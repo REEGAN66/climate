@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Climate Update — Real-time weather and 3-day forecast for your location. No API key required." />
+  <title>Climate Update — Your Local Weather</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="theme-default" id="app-body">
+
+  <!-- ========== HEADER ========== -->
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <div class="logo" aria-label="Climate Update">
+        <span class="logo-icon" aria-hidden="true">🌍</span>
+        <span class="logo-text">Climate Update</span>
+      </div>
+
+      <nav class="header-controls" aria-label="App controls">
+        <!-- Unit Toggle -->
+        <div class="unit-toggle" role="group" aria-label="Temperature unit">
+          <button
+            id="btn-celsius"
+            class="unit-btn active"
+            aria-pressed="true"
+            title="Switch to Celsius"
+          >°C</button>
+          <button
+            id="btn-fahrenheit"
+            class="unit-btn"
+            aria-pressed="false"
+            title="Switch to Fahrenheit"
+          >°F</button>
+        </div>
+
+        <!-- Locate Me Button -->
+        <button class="btn-locate" id="btn-locate" title="Use my current location" aria-label="Detect my location">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/>
+          </svg>
+          <span>My Location</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ========== SEARCH BAR ========== -->
+  <section class="search-section" aria-label="City search">
+    <div class="search-wrapper">
+      <form class="search-form" id="search-form" role="search" aria-label="Search for a city">
+        <div class="search-input-wrap">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            type="search"
+            id="city-input"
+            class="search-input"
+            placeholder="Search city, e.g. London, Tokyo…"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Enter city name"
+            aria-autocomplete="list"
+            aria-controls="search-suggestions"
+          />
+          <button type="submit" class="search-btn" id="search-btn" aria-label="Search weather">
+            Search
+          </button>
+        </div>
+        <!-- Autocomplete suggestions -->
+        <ul id="search-suggestions" class="suggestions-list" role="listbox" aria-label="City suggestions" hidden></ul>
+      </form>
+    </div>
+  </section>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content" id="main-content" role="main">
+
+    <!-- Permission Prompt -->
+    <div id="permission-prompt" class="permission-prompt" role="alertdialog" aria-modal="false" aria-labelledby="perm-title" aria-describedby="perm-desc" hidden>
+      <div class="perm-card">
+        <div class="perm-icon" aria-hidden="true">📍</div>
+        <h2 id="perm-title" class="perm-title">Enable Location</h2>
+        <p id="perm-desc" class="perm-desc">
+          Allow <strong>Climate Update</strong> to access your location for instant local weather, or search for any city manually.
+        </p>
+        <div class="perm-actions">
+          <button class="btn-primary" id="btn-allow-location">Allow Location</button>
+          <button class="btn-ghost" id="btn-deny-location">Search Manually</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Skeleton -->
+    <div id="loading-state" class="loading-state" aria-live="polite" aria-label="Loading weather data" hidden>
+      <div class="skeleton-hero">
+        <div class="skeleton-line wide"></div>
+        <div class="skeleton-line medium"></div>
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-line narrow"></div>
+        <div class="skeleton-line medium"></div>
+      </div>
+      <div class="skeleton-forecast">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+      <p class="loading-text" aria-live="polite">Fetching weather data…</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error-state" class="error-state" role="alert" aria-live="assertive" hidden>
+      <div class="error-card">
+        <div class="error-icon" aria-hidden="true">⚠️</div>
+        <h2 class="error-title" id="error-title">Oops, something went wrong</h2>
+        <p class="error-message" id="error-message">Unable to load weather data. Please try again.</p>
+        <button class="btn-primary" id="btn-retry">Try Again</button>
+      </div>
+    </div>
+
+    <!-- Weather Content -->
+    <div id="weather-content" class="weather-content" hidden>
+
+      <!-- Location Header -->
+      <div class="location-header" aria-live="polite">
+        <div class="location-name-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="pin-icon">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+          </svg>
+          <h1 id="location-name" class="location-name">Loading…</h1>
+        </div>
+        <p id="location-sub" class="location-sub"></p>
+        <p id="last-updated" class="last-updated"></p>
+      </div>
+
+      <!-- Hero Current Weather Card -->
+      <div class="hero-card" id="hero-card" aria-label="Current weather conditions">
+        <div class="hero-left">
+          <div class="current-temp-wrap">
+            <span id="current-temp" class="current-temp">--</span>
+            <span class="temp-unit" id="hero-unit">°C</span>
+          </div>
+          <p id="feels-like" class="feels-like">Feels like --</p>
+          <p id="current-condition" class="current-condition">--</p>
+        </div>
+        <div class="hero-center">
+          <div id="hero-icon" class="hero-weather-icon" aria-label="Weather icon" role="img">🌤</div>
+        </div>
+        <div class="hero-right">
+          <div class="weather-detail" id="detail-humidity">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            <div>
+              <span class="detail-label">Humidity</span>
+              <span class="detail-value" id="humidity-val">--%</span>
+            </div>
+          </div>
+          <div class="weather-detail" id="detail-wind">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>
+            <div>
+              <span class="detail-label">Wind</span>
+              <span class="detail-value" id="wind-val">-- km/h</span>
+            </div>
+          </div>
+          <div class="weather-detail" id="detail-precip">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/></svg>
+            <div>
+              <span class="detail-label">Precipitation</span>
+              <span class="detail-value" id="precip-val">-- mm</span>
+            </div>
+          </div>
+          <div class="weather-detail" id="detail-uv">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            <div>
+              <span class="detail-label">UV Index</span>
+              <span class="detail-value" id="uv-val">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3-Day Forecast Section -->
+      <section class="forecast-section" aria-label="3-day weather forecast">
+        <h2 class="section-title">3-Day Forecast</h2>
+        <div class="forecast-grid" id="forecast-grid" role="list">
+          <!-- Forecast cards injected by JS -->
+        </div>
+      </section>
+
+      <!-- Hourly Trend -->
+      <section class="hourly-section" aria-label="Today's hourly temperature">
+        <h2 class="section-title">Today's Hourly</h2>
+        <div class="hourly-scroll" id="hourly-scroll" role="list" aria-label="Hourly forecast">
+          <!-- Hourly slots injected by JS -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="site-footer" role="contentinfo">
+    <p>Powered by <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer">Open-Meteo</a> &amp; <a href="https://nominatim.openstreetmap.org" target="_blank" rel="noopener noreferrer">Nominatim</a> — Free &amp; open weather data</p>
+  </footer>
+
+  <!-- Scripts — only the entry point needs to be loaded; api.js and ui.js are imported by app.js -->
+  <script src="js/app.js" type="module"></script>
+</body>
+</html>
