@@ -32,6 +32,7 @@
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
   --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-theme: 0.3s ease;  /* Required theme-switch transition */
 
   /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
@@ -39,7 +40,7 @@
   --shadow-lg: 0 10px 40px rgba(0,0,0,0.20), 0 4px 12px rgba(0,0,0,0.12);
   --shadow-xl: 0 20px 60px rgba(0,0,0,0.28);
 
-  /* Default (clear) theme colors */
+  /* ── Default weather-condition theme colors (applied by JS) ── */
   --bg-from: #0f172a;
   --bg-via: #1e3a5f;
   --bg-to: #0f2d4a;
@@ -52,6 +53,21 @@
   --text-secondary: rgba(240,249,255,0.70);
   --text-muted: rgba(240,249,255,0.45);
   --card-shadow: 0 8px 32px rgba(0,0,0,0.30);
+
+  /* ── Base UI surface colors (independent of weather theme) ── */
+  /* Dark mode defaults */
+  --surface-bg:        #0f172a;
+  --surface-card:      rgba(255,255,255,0.07);
+  --surface-border:    rgba(255,255,255,0.12);
+  --surface-hover:     rgba(255,255,255,0.11);
+  --surface-header:    rgba(0,0,0,0.22);
+  --surface-input:     rgba(255,255,255,0.07);
+  --surface-dropdown:  rgba(10,18,35,0.96);
+  --text-on-accent:    #0f172a;
+  --precip-color:      #93c5fd;
+  --precip-bg:         rgba(96,165,250,0.12);
+  --accent-slot-bg:    rgba(96,165,250,0.12);
+  --today-card-bg:     rgba(96,165,250,0.10);
 }
 
 /* ---------- 2. Weather Themes ---------- */
@@ -150,11 +166,157 @@
   --card-shadow: 0 8px 32px rgba(107,114,128,0.40);
 }
 
+/* ============================================================
+   2b. Dark / Light UI Theme Modes
+   Applied via data-theme="dark" | data-theme="light" on <html>.
+   These control non-weather-gradient surface & text colors.
+   Weather themes override --bg-from/via/to and --accent on
+   the body element class; the surface variables below stay
+   stable per UI mode.
+   ============================================================ */
+
+/* ── DARK MODE (default) ── */
+[data-theme="dark"] {
+  --surface-bg:        #0f172a;
+  --surface-card:      rgba(255,255,255,0.07);
+  --surface-border:    rgba(255,255,255,0.12);
+  --surface-hover:     rgba(255,255,255,0.11);
+  --surface-header:    rgba(0,0,0,0.22);
+  --surface-input:     rgba(255,255,255,0.07);
+  --surface-dropdown:  rgba(10,18,35,0.96);
+  --text-on-accent:    #0f172a;
+  --precip-color:      #93c5fd;
+  --precip-bg:         rgba(96,165,250,0.12);
+  --accent-slot-bg:    rgba(96,165,250,0.12);
+  --today-card-bg:     rgba(96,165,250,0.10);
+  color-scheme: dark;
+}
+
+/* ── LIGHT MODE ── */
+[data-theme="light"] {
+  --surface-bg:        #f0f6ff;
+  --surface-card:      rgba(255,255,255,0.72);
+  --surface-border:    rgba(0,0,0,0.09);
+  --surface-hover:     rgba(255,255,255,0.90);
+  --surface-header:    rgba(255,255,255,0.60);
+  --surface-input:     rgba(255,255,255,0.72);
+  --surface-dropdown:  rgba(248,250,255,0.98);
+  --text-on-accent:    #ffffff;
+  --precip-color:      #2563eb;
+  --precip-bg:         rgba(37,99,235,0.10);
+  --accent-slot-bg:    rgba(37,99,235,0.08);
+  --today-card-bg:     rgba(37,99,235,0.07);
+  color-scheme: light;
+
+  /* Override weather-gradient defaults for light mode */
+  --glass-bg:          rgba(255,255,255,0.52);
+  --glass-border:      rgba(0,0,0,0.09);
+  --glass-hover:       rgba(255,255,255,0.80);
+  --text-primary:      #0f172a;
+  --text-secondary:    rgba(15,23,42,0.68);
+  --text-muted:        rgba(15,23,42,0.44);
+  --card-shadow:       0 8px 32px rgba(30,64,175,0.10);
+}
+
+/* Light mode: override per-weather-condition bg-from/via/to so
+   gradients look pleasant on a light canvas */
+[data-theme="light"].theme-default,
+[data-theme="light"].theme-night {
+  --bg-from: #dbeafe;
+  --bg-via:  #bfdbfe;
+  --bg-to:   #e0f2fe;
+  --accent:  #2563eb;
+  --accent-light: #1d4ed8;
+}
+[data-theme="light"].theme-sunny {
+  --bg-from: #fef3c7;
+  --bg-via:  #fde68a;
+  --bg-to:   #fcd34d;
+  --text-primary: #78350f;
+  --text-secondary: rgba(120,53,15,0.72);
+  --text-muted:    rgba(120,53,15,0.45);
+  --accent: #d97706;
+  --accent-light: #b45309;
+}
+[data-theme="light"].theme-cloudy {
+  --bg-from: #e5e7eb;
+  --bg-via:  #f3f4f6;
+  --bg-to:   #d1d5db;
+  --text-primary: #1f2937;
+  --text-secondary: rgba(31,41,55,0.70);
+  --text-muted:    rgba(31,41,55,0.45);
+  --accent: #4b5563;
+  --accent-light: #374151;
+}
+[data-theme="light"].theme-rainy {
+  --bg-from: #bfdbfe;
+  --bg-via:  #93c5fd;
+  --bg-to:   #dbeafe;
+  --text-primary: #1e3a5f;
+  --text-secondary: rgba(30,58,95,0.72);
+  --text-muted:    rgba(30,58,95,0.45);
+  --accent: #2563eb;
+  --accent-light: #1d4ed8;
+}
+[data-theme="light"].theme-stormy {
+  --bg-from: #d1d5db;
+  --bg-via:  #9ca3af;
+  --bg-to:   #6b7280;
+  --text-primary: #111827;
+  --text-secondary: rgba(17,24,39,0.70);
+  --text-muted:    rgba(17,24,39,0.45);
+  --accent: #f59e0b;
+  --accent-light: #d97706;
+}
+[data-theme="light"].theme-snowy {
+  --bg-from: #e0f2fe;
+  --bg-via:  #bae6fd;
+  --bg-to:   #e0e7ef;
+}
+[data-theme="light"].theme-foggy {
+  --bg-from: #e5e7eb;
+  --bg-via:  #f3f4f6;
+  --bg-to:   #d1d5db;
+  --text-primary: #1f2937;
+  --text-secondary: rgba(31,41,55,0.70);
+  --text-muted:    rgba(31,41,55,0.45);
+  --accent: #4b5563;
+  --accent-light: #374151;
+}
+
 /* ---------- 3. Reset & Base ---------- */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* ---------- 3a. Global Theme Transition ---------- */
+/*
+  Every element inherits color/background-color transitions so the
+  dark↔light switch is never jarring. We keep it tight (0.3s ease)
+  per the requirement. Animations and transforms are excluded.
+*/
+*,
+*::before,
+*::after {
+  transition:
+    background-color var(--transition-theme, 0.3s ease),
+    color            var(--transition-theme, 0.3s ease),
+    border-color     var(--transition-theme, 0.3s ease),
+    box-shadow       var(--transition-theme, 0.3s ease);
+}
+
+/* Re-allow fast interaction transitions to override the theme one */
+button, a, input, [role="button"] {
+  transition:
+    background-color var(--transition-theme, 0.3s ease),
+    color            var(--transition-theme, 0.3s ease),
+    border-color     var(--transition-theme, 0.3s ease),
+    box-shadow       var(--transition-theme, 0.3s ease),
+    transform        var(--transition-base),
+    filter           var(--transition-base),
+    opacity          var(--transition-fast);
 }
 
 html {
@@ -228,8 +390,8 @@ ul { list-style: none; }
   padding-block: var(--space-4);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  background: rgba(0,0,0,0.18);
-  border-bottom: 1px solid var(--glass-border);
+  background: var(--surface-header);
+  border-bottom: 1px solid var(--surface-border);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -298,7 +460,7 @@ ul { list-style: none; }
 .unit-btn.active,
 .unit-btn[aria-pressed="true"] {
   background: var(--accent);
-  color: #0f172a;
+  color: var(--text-on-accent);
   box-shadow: 0 2px 8px rgba(0,0,0,0.20);
 }
 
@@ -306,6 +468,50 @@ ul { list-style: none; }
   background: var(--glass-hover);
   color: var(--text-primary);
 }
+
+/* ---------- 5b. Theme Toggle Button ---------- */
+.btn-theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-theme-toggle:hover {
+  background: var(--surface-hover);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-theme-toggle:active { transform: translateY(0); }
+
+.theme-toggle-label {
+  font-family: var(--font-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Icon spin on theme change */
+.theme-icon {
+  flex-shrink: 0;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease !important; /* override global transition */
+}
+
+.theme-icon-sun  { color: #fbbf24; }
+.theme-icon-moon { color: #93c5fd; }
+
+[data-theme="light"] .theme-icon-moon { color: #6366f1; }
 
 /* Locate Button */
 .btn-locate {
@@ -385,12 +591,11 @@ ul { list-style: none; }
   flex-shrink: 0;
   padding: var(--space-2) var(--space-5);
   background: var(--accent);
-  color: #0f172a;
+  color: var(--text-on-accent);
   border-radius: var(--radius-full);
   font-family: var(--font-primary);
   font-size: 0.9rem;
   font-weight: 600;
-  transition: all var(--transition-base);
 }
 
 .search-btn:hover {
@@ -406,10 +611,10 @@ ul { list-style: none; }
   position: absolute;
   top: calc(100% + var(--space-2));
   left: 0; right: 0;
-  background: rgba(15, 23, 42, 0.95);
+  background: var(--surface-dropdown);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--surface-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   z-index: 200;
@@ -427,11 +632,10 @@ ul { list-style: none; }
 .suggestion-item {
   padding: var(--space-3) var(--space-5);
   cursor: pointer;
-  transition: background var(--transition-fast);
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  border-bottom: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--surface-border);
   color: var(--text-primary);
   font-size: 0.95rem;
 }
@@ -506,12 +710,11 @@ ul { list-style: none; }
 .btn-primary {
   padding: var(--space-3) var(--space-6);
   background: var(--accent);
-  color: #0f172a;
+  color: var(--text-on-accent);
   border-radius: var(--radius-full);
   font-family: var(--font-primary);
   font-size: 0.95rem;
   font-weight: 700;
-  transition: all var(--transition-base);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -882,7 +1085,7 @@ ul { list-style: none; }
 
 .forecast-card.today {
   border-color: var(--accent);
-  background: rgba(96,165,250,0.10);
+  background: var(--today-card-bg);
 }
 
 .forecast-day {
@@ -943,8 +1146,8 @@ ul { list-style: none; }
   align-items: center;
   gap: var(--space-1);
   font-size: 0.78rem;
-  color: #93c5fd;
-  background: rgba(96,165,250,0.12);
+  color: var(--precip-color);
+  background: var(--precip-bg);
   padding: 2px var(--space-3);
   border-radius: var(--radius-full);
   font-weight: 600;
@@ -982,7 +1185,7 @@ ul { list-style: none; }
 
 .hourly-slot.current-hour {
   border-color: var(--accent);
-  background: rgba(96,165,250,0.12);
+  background: var(--accent-slot-bg);
 }
 
 .hourly-slot:hover {
@@ -1013,7 +1216,7 @@ ul { list-style: none; }
 
 .hourly-precip {
   font-size: 0.7rem;
-  color: #93c5fd;
+  color: var(--precip-color);
   margin-top: var(--space-1);
 }
 
@@ -1098,20 +1301,21 @@ ul { list-style: none; }
   opacity: 0;
 }
 
-/* ============ Dark / Light system preference ============ */
-@media (prefers-color-scheme: light) {
-  .theme-default {
-    --bg-from: #dbeafe;
-    --bg-via: #bfdbfe;
-    --bg-to: #e0f2fe;
-    --glass-bg: rgba(255,255,255,0.50);
-    --glass-border: rgba(0,0,0,0.10);
-    --glass-hover: rgba(255,255,255,0.70);
-    --text-primary: #0f172a;
-    --text-secondary: rgba(15,23,42,0.70);
-    --text-muted: rgba(15,23,42,0.45);
-    --card-shadow: 0 8px 32px rgba(30,64,175,0.12);
-    --accent: #2563eb;
-    --accent-light: #1d4ed8;
+/* ============ 18. Responsive collapse for theme toggle ============ */
+@media (max-width: 680px) {
+  .btn-theme-toggle .theme-toggle-label { display: none; }
+  .btn-theme-toggle {
+    padding: var(--space-2);
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    justify-content: center;
   }
 }
+
+/*
+  NOTE: The old @media (prefers-color-scheme: light) block has been
+  removed. System preference is now handled in JS (theme.js) which
+  sets data-theme on <html>, giving you localStorage persistence on
+  top of system preference fallback.
+*/

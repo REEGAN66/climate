@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -24,6 +24,17 @@
       </div>
 
       <nav class="header-controls" aria-label="App controls">
+        <!-- Theme Toggle -->
+        <button
+          id="btn-theme-toggle"
+          class="btn-theme-toggle"
+          aria-label="Switch to light mode"
+          aria-pressed="true"
+          title="Switch to light mode"
+        >
+          <!-- Icon & label injected by theme.js -->
+        </button>
+
         <!-- Unit Toggle -->
         <div class="unit-toggle" role="group" aria-label="Temperature unit">
           <button
@@ -209,7 +220,13 @@
     <p>Powered by <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer">Open-Meteo</a> &amp; <a href="https://nominatim.openstreetmap.org" target="_blank" rel="noopener noreferrer">Nominatim</a> — Free &amp; open weather data</p>
   </footer>
 
-  <!-- Scripts — only the entry point needs to be loaded; api.js and ui.js are imported by app.js -->
+  <!-- Theme must load before first paint to avoid flash -->
+  <script type="module">
+    import { initTheme } from './js/theme.js';
+    initTheme();
+  </script>
+
+  <!-- App entry point -->
   <script src="js/app.js" type="module"></script>
 </body>
 </html>

@@ -10,6 +10,8 @@ import {
   reverseGeocode,
 } from './api.js';
 
+import { initTheme } from './theme.js';
+
 import {
   els,
   showPermissionPrompt,
@@ -41,6 +43,7 @@ const state = {
 // Bootstrap
 // ────────────────────────────────────────────────────────────
 function init() {
+  initTheme();   // Apply saved/system theme & wire toggle button
   bindEvents();
   checkGeolocationSupport();
 }
