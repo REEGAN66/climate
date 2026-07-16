@@ -5,6 +5,7 @@
  */
 
 import { formatTemp, toMph } from './api.js';
+import { startWeatherBg }   from './weather-bg.js';
 
 // ────────────────────────────────────────────────────────────
 // DOM Element References (cached for performance)
@@ -160,8 +161,9 @@ export function renderCurrent(current, unit) {
   els.precipVal.textContent = `${current.precipitation} mm`;
   els.uvVal.textContent     = formatUvIndex(current.uvIndex ?? 0);
 
-  // Apply theme
+  // Apply weather theme (body class) AND animated background
   applyTheme(current.theme);
+  startWeatherBg(current.theme);
 }
 
 /** Map UV index number → label */

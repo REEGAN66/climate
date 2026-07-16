@@ -15,6 +15,23 @@
 </head>
 <body class="theme-default" id="app-body">
 
+  <!-- ========== ANIMATED WEATHER BACKGROUND ========== -->
+  <div class="weather-bg-layer" id="weather-bg-layer" aria-hidden="true">
+    <!-- Canvas: rain / snow particles (JS-driven) -->
+    <canvas id="weather-canvas"></canvas>
+    <!-- Star field: night mode (JS-generated divs + CSS animation) -->
+    <div id="stars-container" class="stars-container"></div>
+    <!-- Sun: CSS-driven glow orb -->
+    <div class="sun-glow-orb" id="sun-orb"></div>
+    <!-- Sun: CSS-driven rotating rays -->
+    <div class="sun-rays-wrap" id="sun-rays-wrap">
+      <div class="sun-rays"></div>
+    </div>
+    <!-- Fog: CSS-driven drift blobs -->
+    <div class="fog-blob fog-blob-1"></div>
+    <div class="fog-blob fog-blob-2"></div>
+  </div>
+
   <!-- ========== HEADER ========== -->
   <header class="site-header" role="banner">
     <div class="header-inner">
