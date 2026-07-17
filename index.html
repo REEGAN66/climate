@@ -183,31 +183,146 @@
         </div>
         <div class="hero-right">
           <div class="weather-detail" id="detail-humidity">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+            </svg>
             <div>
               <span class="detail-label">Humidity</span>
               <span class="detail-value" id="humidity-val">--%</span>
             </div>
           </div>
           <div class="weather-detail" id="detail-wind">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9.59 0.885L7 7m12.12-2.112L17 7M21 11H3c0 5.523 4.477 10 10 10s10-4.477 10-10z"/>
+            </svg>
             <div>
               <span class="detail-label">Wind</span>
               <span class="detail-value" id="wind-val">-- km/h</span>
             </div>
           </div>
           <div class="weather-detail" id="detail-precip">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+            </svg>
             <div>
               <span class="detail-label">Precipitation</span>
               <span class="detail-value" id="precip-val">-- mm</span>
             </div>
           </div>
           <div class="weather-detail" id="detail-uv">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
             <div>
               <span class="detail-label">UV Index</span>
               <span class="detail-value" id="uv-val">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Premium Weather Details Modal -->
+      <div id="weather-modal" class="weather-modal" role="dialog" aria-labelledby="modal-title" aria-modal="true" hidden>
+        <div class="modal-overlay" id="modal-overlay"></div>
+        <div class="modal-container">
+          <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+              <h2 id="modal-title" class="modal-title">Weather Details</h2>
+              <button class="modal-close" id="modal-close" aria-label="Close weather details" title="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Modal Body: Details Grid -->
+            <div class="modal-body">
+              <div class="details-grid">
+                <!-- Temperature -->
+                <div class="detail-item">
+                  <div class="detail-icon">🌡️</div>
+                  <span class="detail-label">Temperature</span>
+                  <span class="detail-value" id="modal-temp">--</span>
+                </div>
+
+                <!-- Feels Like -->
+                <div class="detail-item">
+                  <div class="detail-icon">🤔</div>
+                  <span class="detail-label">Feels Like</span>
+                  <span class="detail-value" id="modal-feels-like">--</span>
+                </div>
+
+                <!-- Humidity -->
+                <div class="detail-item">
+                  <div class="detail-icon">💧</div>
+                  <span class="detail-label">Humidity</span>
+                  <span class="detail-value" id="modal-humidity">--%</span>
+                </div>
+
+                <!-- Pressure -->
+                <div class="detail-item">
+                  <div class="detail-icon">🔽</div>
+                  <span class="detail-label">Pressure</span>
+                  <span class="detail-value" id="modal-pressure">-- hPa</span>
+                </div>
+
+                <!-- Wind Speed -->
+                <div class="detail-item">
+                  <div class="detail-icon">💨</div>
+                  <span class="detail-label">Wind Speed</span>
+                  <span class="detail-value" id="modal-wind">-- km/h</span>
+                </div>
+
+                <!-- Visibility -->
+                <div class="detail-item">
+                  <div class="detail-icon">👁️</div>
+                  <span class="detail-label">Visibility</span>
+                  <span class="detail-value" id="modal-visibility">-- km</span>
+                </div>
+
+                <!-- UV Index -->
+                <div class="detail-item">
+                  <div class="detail-icon">☀️</div>
+                  <span class="detail-label">UV Index</span>
+                  <span class="detail-value" id="modal-uv">--</span>
+                </div>
+
+                <!-- Sunrise -->
+                <div class="detail-item">
+                  <div class="detail-icon">🌅</div>
+                  <span class="detail-label">Sunrise</span>
+                  <span class="detail-value" id="modal-sunrise">--</span>
+                </div>
+
+                <!-- Sunset -->
+                <div class="detail-item">
+                  <div class="detail-icon">🌇</div>
+                  <span class="detail-label">Sunset</span>
+                  <span class="detail-value" id="modal-sunset">--</span>
+                </div>
+
+                <!-- Dew Point -->
+                <div class="detail-item">
+                  <div class="detail-icon">❄️</div>
+                  <span class="detail-label">Dew Point</span>
+                  <span class="detail-value" id="modal-dew-point">--</span>
+                </div>
+
+                <!-- Chance of Rain -->
+                <div class="detail-item">
+                  <div class="detail-icon">🌧️</div>
+                  <span class="detail-label">Chance of Rain</span>
+                  <span class="detail-value" id="modal-precip-chance">--%</span>
+                </div>
+
+                <!-- Air Quality Index -->
+                <div class="detail-item">
+                  <div class="detail-icon">💨</div>
+                  <span class="detail-label">Air Quality</span>
+                  <span class="detail-value" id="modal-aqi">--</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -234,7 +349,7 @@
 
   <!-- ========== FOOTER ========== -->
   <footer class="site-footer" role="contentinfo">
-    <p>Powered by <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer">Open-Meteo</a> &amp; <a href="https://nominatim.openstreetmap.org" target="_blank" rel="noopener noreferrer">Nominatim</a> — Free &amp; open weather data</p>
+    <p>Powered by <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer">Open-Meteo</a> &amp; <a href="https://nominatim.openstreetmap.org" target="_blank" rel="noopener noreferrer">Nominatim</a>. Made with ❤️.</p>
   </footer>
 
   <!-- Theme must load before first paint to avoid flash -->
