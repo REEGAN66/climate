@@ -3,15 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Climate Update — Real-time weather and 3-day forecast for your location. No API key required." />
-  <title>Climate Update — Your Local Weather</title>
+  <meta name="description" content="Climate Update — Premium AI-powered weather dashboard with real-time data, 7-day forecast, animated backgrounds, and detailed meteorological insights. No API key required." />
+  <title>Climate Update — Premium Weather Dashboard</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
 
+  <!-- Stylesheets -->
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/sidebar.css" />
+  <link rel="stylesheet" href="css/charts.css" />
 </head>
 <body class="theme-default" id="app-body">
 
@@ -35,9 +38,31 @@
   <!-- ========== HEADER ========== -->
   <header class="site-header" role="banner">
     <div class="header-inner">
-      <div class="logo" aria-label="Climate Update">
-        <span class="logo-icon" aria-hidden="true">🌍</span>
-        <span class="logo-text">Climate Update</span>
+
+      <!-- Left: Sidebar Toggle + Logo -->
+      <div class="header-left">
+        <!-- Sidebar toggle button -->
+        <button
+          id="sidebar-toggle"
+          class="btn-sidebar-toggle"
+          aria-label="Toggle weather details sidebar"
+          aria-expanded="false"
+          aria-controls="sidebar"
+          title="Toggle sidebar"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="16" y2="12"/>
+            <line x1="3" y1="18" x2="11" y2="18"/>
+          </svg>
+          <span class="sidebar-toggle-label">Details</span>
+        </button>
+
+        <div class="logo" aria-label="Climate Update">
+          <span class="logo-icon" aria-hidden="true">🌍</span>
+          <span class="logo-text">Climate Update</span>
+        </div>
       </div>
 
       <nav class="header-controls" aria-label="App controls">
@@ -108,244 +133,418 @@
     </div>
   </section>
 
-  <!-- ========== MAIN CONTENT ========== -->
-  <main class="main-content" id="main-content" role="main">
+  <!-- ========== APP LAYOUT (Sidebar + Main) ========== -->
+  <div class="app-layout">
 
-    <!-- Permission Prompt -->
-    <div id="permission-prompt" class="permission-prompt" role="alertdialog" aria-modal="false" aria-labelledby="perm-title" aria-describedby="perm-desc" hidden>
-      <div class="perm-card">
-        <div class="perm-icon" aria-hidden="true">📍</div>
-        <h2 id="perm-title" class="perm-title">Enable Location</h2>
-        <p id="perm-desc" class="perm-desc">
-          Allow <strong>Climate Update</strong> to access your location for instant local weather, or search for any city manually.
-        </p>
-        <div class="perm-actions">
-          <button class="btn-primary" id="btn-allow-location">Allow Location</button>
-          <button class="btn-ghost" id="btn-deny-location">Search Manually</button>
-        </div>
-      </div>
-    </div>
+    <!-- ===== LEFT SIDEBAR ===== -->
+    <!-- Sidebar backdrop (mobile only) -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
 
-    <!-- Loading Skeleton -->
-    <div id="loading-state" class="loading-state" aria-live="polite" aria-label="Loading weather data" hidden>
-      <div class="skeleton-hero">
-        <div class="skeleton-line wide"></div>
-        <div class="skeleton-line medium"></div>
-        <div class="skeleton-circle"></div>
-        <div class="skeleton-line narrow"></div>
-        <div class="skeleton-line medium"></div>
-      </div>
-      <div class="skeleton-forecast">
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-      </div>
-      <p class="loading-text" aria-live="polite">Fetching weather data…</p>
-    </div>
-
-    <!-- Error State -->
-    <div id="error-state" class="error-state" role="alert" aria-live="assertive" hidden>
-      <div class="error-card">
-        <div class="error-icon" aria-hidden="true">⚠️</div>
-        <h2 class="error-title" id="error-title">Oops, something went wrong</h2>
-        <p class="error-message" id="error-message">Unable to load weather data. Please try again.</p>
-        <button class="btn-primary" id="btn-retry">Try Again</button>
-      </div>
-    </div>
-
-    <!-- Weather Content -->
-    <div id="weather-content" class="weather-content" hidden>
-
-      <!-- Location Header -->
-      <div class="location-header" aria-live="polite">
-        <div class="location-name-wrap">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="pin-icon">
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
-          </svg>
-          <h1 id="location-name" class="location-name">Loading…</h1>
-        </div>
-        <p id="location-sub" class="location-sub"></p>
-        <p id="last-updated" class="last-updated"></p>
-      </div>
-
-      <!-- Hero Current Weather Card -->
-      <div class="hero-card" id="hero-card" aria-label="Current weather conditions">
-        <div class="hero-left">
-          <div class="current-temp-wrap">
-            <span id="current-temp" class="current-temp">--</span>
-            <span class="temp-unit" id="hero-unit">°C</span>
-          </div>
-          <p id="feels-like" class="feels-like">Feels like --</p>
-          <p id="current-condition" class="current-condition">--</p>
-        </div>
-        <div class="hero-center">
-          <div id="hero-icon" class="hero-weather-icon" aria-label="Weather icon" role="img">🌤</div>
-        </div>
-        <div class="hero-right">
-          <div class="weather-detail" id="detail-humidity">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+    <aside
+      class="sidebar"
+      id="sidebar"
+      role="complementary"
+      aria-label="Weather details sidebar"
+    >
+      <div class="sidebar-inner">
+        <div class="sidebar-header">
+          <span class="sidebar-title">Weather Details</span>
+          <button class="sidebar-close" id="sidebar-close" aria-label="Close sidebar" title="Close sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12"/>
             </svg>
-            <div>
-              <span class="detail-label">Humidity</span>
-              <span class="detail-value" id="humidity-val">--%</span>
+          </button>
+        </div>
+
+        <!-- Metric items (values injected by sidebar.js) -->
+        <div class="sidebar-items" role="list">
+          <button class="sidebar-item" id="sb-humidity" data-metric="humidity" role="listitem" aria-label="Humidity details">
+            <span class="sb-icon" aria-hidden="true">💧</span>
+            <span class="sb-text">
+              <span class="sb-label">Humidity</span>
+              <span class="sb-value">—</span>
+            </span>
+            <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+
+          <button class="sidebar-item" id="sb-feels" data-metric="feelsLike" role="listitem" aria-label="Feels like temperature details">
+            <span class="sb-icon" aria-hidden="true">🤔</span>
+            <span class="sb-text">
+              <span class="sb-label">Feels Like</span>
+              <span class="sb-value">—</span>
+            </span>
+            <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+
+          <button class="sidebar-item" id="sb-wind-speed" data-metric="windSpeed" role="listitem" aria-label="Wind speed details">
+            <span class="sb-icon" aria-hidden="true">💨</span>
+            <span class="sb-text">
+              <span class="sb-label">Wind Speed</span>
+              <span class="sb-value">—</span>
+            </span>
+            <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+
+          <button class="sidebar-item" id="sb-wind-dir" data-metric="windDir" role="listitem" aria-label="Wind direction details">
+            <span class="sb-icon" aria-hidden="true">🧭</span>
+            <span class="sb-text">
+              <span class="sb-label">Wind Direction</span>
+              <span class="sb-value">—</span>
+            </span>
+            <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+
+          <button class="sidebar-item" id="sb-pressure" data-metric="pressure" role="listitem" aria-label="Atmospheric pressure details">
+            <span class="sb-icon" aria-hidden="true">🔽</span>
+            <span class="sb-text">
+              <span class="sb-label">Pressure</span>
+              <span class="sb-value">—</span>
+            </span>
+            <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+
+          <button class="sidebar-item" id="sb-visibility" data-metric="visibility" role="listitem" aria-label="Visibility details">
+            <span class="sb-icon" aria-hidden="true">👁️</span>
+            <span class="sb-text">
+              <span class="sb-label">Visibility</span>
+              <span class="sb-value">—</span>
+            </span>
+            <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+
+          <button class="sidebar-item" id="sb-uv" data-metric="uvIndex" role="listitem" aria-label="UV index details">
+            <span class="sb-icon" aria-hidden="true">☀️</span>
+            <span class="sb-text">
+              <span class="sb-label">UV Index</span>
+              <span class="sb-value">—</span>
+            </span>
+            <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+
+          <button class="sidebar-item" id="sb-dew" data-metric="dewPoint" role="listitem" aria-label="Dew point details">
+            <span class="sb-icon" aria-hidden="true">❄️</span>
+            <span class="sb-text">
+              <span class="sb-label">Dew Point</span>
+              <span class="sb-value">—</span>
+            </span>
+            <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+
+          <button class="sidebar-item" id="sb-cloud" data-metric="cloudCover" role="listitem" aria-label="Cloud cover details">
+            <span class="sb-icon" aria-hidden="true">☁️</span>
+            <span class="sb-text">
+              <span class="sb-label">Cloud Cover</span>
+              <span class="sb-value">—</span>
+            </span>
+            <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+
+          <button class="sidebar-item" id="sb-rain" data-metric="precipChance" role="listitem" aria-label="Rain chance details">
+            <span class="sb-icon" aria-hidden="true">🌧️</span>
+            <span class="sb-text">
+              <span class="sb-label">Rain Chance</span>
+              <span class="sb-value">—</span>
+            </span>
+            <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+
+          <button class="sidebar-item" id="sb-sunrise" data-metric="sunrise" role="listitem" aria-label="Sunrise details">
+            <span class="sb-icon" aria-hidden="true">🌅</span>
+            <span class="sb-text">
+              <span class="sb-label">Sunrise</span>
+              <span class="sb-value">—</span>
+            </span>
+            <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+
+          <button class="sidebar-item" id="sb-sunset" data-metric="sunset" role="listitem" aria-label="Sunset details">
+            <span class="sb-icon" aria-hidden="true">🌇</span>
+            <span class="sb-text">
+              <span class="sb-label">Sunset</span>
+              <span class="sb-value">—</span>
+            </span>
+            <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+
+          <button class="sidebar-item" id="sb-moon" data-metric="moon" role="listitem" aria-label="Moon phase details">
+            <span class="sb-icon" aria-hidden="true">🌙</span>
+            <span class="sb-text">
+              <span class="sb-label">Moon Phase</span>
+              <span class="sb-value">—</span>
+            </span>
+            <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+
+          <button class="sidebar-item" id="sb-aqi" data-metric="aqi" role="listitem" aria-label="Air quality details">
+            <span class="sb-icon" aria-hidden="true">🌬️</span>
+            <span class="sb-text">
+              <span class="sb-label">Air Quality</span>
+              <span class="sb-value">—</span>
+            </span>
+            <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== MAIN COLUMN ===== -->
+    <div class="main-column">
+
+      <!-- ========== MAIN CONTENT ========== -->
+      <main class="main-content" id="main-content" role="main">
+
+        <!-- Permission Prompt -->
+        <div id="permission-prompt" class="permission-prompt" role="alertdialog" aria-modal="false" aria-labelledby="perm-title" aria-describedby="perm-desc" hidden>
+          <div class="perm-card">
+            <div class="perm-icon" aria-hidden="true">📍</div>
+            <h2 id="perm-title" class="perm-title">Enable Location</h2>
+            <p id="perm-desc" class="perm-desc">
+              Allow <strong>Climate Update</strong> to access your location for instant local weather, or search for any city manually.
+            </p>
+            <div class="perm-actions">
+              <button class="btn-primary" id="btn-allow-location">Allow Location</button>
+              <button class="btn-ghost" id="btn-deny-location">Search Manually</button>
             </div>
           </div>
-          <div class="weather-detail" id="detail-wind">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M9.59 0.885L7 7m12.12-2.112L17 7M21 11H3c0 5.523 4.477 10 10 10s10-4.477 10-10z"/>
-            </svg>
-            <div>
-              <span class="detail-label">Wind</span>
-              <span class="detail-value" id="wind-val">-- km/h</span>
-            </div>
+        </div>
+
+        <!-- Loading Skeleton -->
+        <div id="loading-state" class="loading-state" aria-live="polite" aria-label="Loading weather data" hidden>
+          <div class="skeleton-hero">
+            <div class="skeleton-line wide"></div>
+            <div class="skeleton-line medium"></div>
+            <div class="skeleton-circle"></div>
+            <div class="skeleton-line narrow"></div>
+            <div class="skeleton-line medium"></div>
           </div>
-          <div class="weather-detail" id="detail-precip">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-            </svg>
-            <div>
-              <span class="detail-label">Precipitation</span>
-              <span class="detail-value" id="precip-val">-- mm</span>
-            </div>
+          <div class="skeleton-forecast">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
           </div>
-          <div class="weather-detail" id="detail-uv">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-            </svg>
-            <div>
-              <span class="detail-label">UV Index</span>
-              <span class="detail-value" id="uv-val">--</span>
-            </div>
+          <p class="loading-text" aria-live="polite">Fetching weather data…</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="error-state" role="alert" aria-live="assertive" hidden>
+          <div class="error-card">
+            <div class="error-icon" aria-hidden="true">⚠️</div>
+            <h2 class="error-title" id="error-title">Oops, something went wrong</h2>
+            <p class="error-message" id="error-message">Unable to load weather data. Please try again.</p>
+            <button class="btn-primary" id="btn-retry">Try Again</button>
           </div>
         </div>
-      </div>
 
-      <!-- Premium Weather Details Modal -->
-      <div id="weather-modal" class="weather-modal" role="dialog" aria-labelledby="modal-title" aria-modal="true" hidden>
-        <div class="modal-overlay" id="modal-overlay"></div>
-        <div class="modal-container">
-          <div class="modal-content">
-            <!-- Modal Header -->
-            <div class="modal-header">
-              <h2 id="modal-title" class="modal-title">Weather Details</h2>
-              <button class="modal-close" id="modal-close" aria-label="Close weather details" title="Close">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        <!-- Weather Content -->
+        <div id="weather-content" class="weather-content" hidden>
+
+          <!-- Location Header -->
+          <div class="location-header" aria-live="polite">
+            <div class="location-name-wrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="pin-icon">
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+              </svg>
+              <h1 id="location-name" class="location-name">Loading…</h1>
+              <!-- Favourite button injected by app.js -->
+              <button id="btn-favourite" class="btn-favourite" title="Add to favourites" aria-label="Add to favourites" aria-pressed="false" hidden>⭐</button>
+            </div>
+            <p id="location-sub" class="location-sub"></p>
+            <p id="last-updated" class="last-updated"></p>
+          </div>
+
+          <!-- Hero Current Weather Card -->
+          <div class="hero-card" id="hero-card" aria-label="Current weather conditions">
+            <div class="hero-left">
+              <div class="current-temp-wrap">
+                <span id="current-temp" class="current-temp">--</span>
+                <span class="temp-unit" id="hero-unit">°C</span>
+              </div>
+              <p id="feels-like" class="feels-like">Feels like --</p>
+              <p id="current-condition" class="current-condition">--</p>
+            </div>
+            <div class="hero-center">
+              <div id="hero-icon" class="hero-weather-icon" aria-label="Weather icon" role="img">🌤</div>
+            </div>
+            <div class="hero-right">
+              <div class="weather-detail" id="detail-humidity">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
                 </svg>
-              </button>
-            </div>
-
-            <!-- Modal Body: Details Grid -->
-            <div class="modal-body">
-              <div class="details-grid">
-                <!-- Temperature -->
-                <div class="detail-item">
-                  <div class="detail-icon">🌡️</div>
-                  <span class="detail-label">Temperature</span>
-                  <span class="detail-value" id="modal-temp">--</span>
-                </div>
-
-                <!-- Feels Like -->
-                <div class="detail-item">
-                  <div class="detail-icon">🤔</div>
-                  <span class="detail-label">Feels Like</span>
-                  <span class="detail-value" id="modal-feels-like">--</span>
-                </div>
-
-                <!-- Humidity -->
-                <div class="detail-item">
-                  <div class="detail-icon">💧</div>
+                <div>
                   <span class="detail-label">Humidity</span>
-                  <span class="detail-value" id="modal-humidity">--%</span>
+                  <span class="detail-value" id="humidity-val">--%</span>
                 </div>
-
-                <!-- Pressure -->
-                <div class="detail-item">
-                  <div class="detail-icon">🔽</div>
-                  <span class="detail-label">Pressure</span>
-                  <span class="detail-value" id="modal-pressure">-- hPa</span>
+              </div>
+              <div class="weather-detail" id="detail-wind">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
+                </svg>
+                <div>
+                  <span class="detail-label">Wind</span>
+                  <span class="detail-value" id="wind-val">-- km/h</span>
                 </div>
-
-                <!-- Wind Speed -->
-                <div class="detail-item">
-                  <div class="detail-icon">💨</div>
-                  <span class="detail-label">Wind Speed</span>
-                  <span class="detail-value" id="modal-wind">-- km/h</span>
+              </div>
+              <div class="weather-detail" id="detail-precip">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                </svg>
+                <div>
+                  <span class="detail-label">Precipitation</span>
+                  <span class="detail-value" id="precip-val">-- mm</span>
                 </div>
-
-                <!-- Visibility -->
-                <div class="detail-item">
-                  <div class="detail-icon">👁️</div>
-                  <span class="detail-label">Visibility</span>
-                  <span class="detail-value" id="modal-visibility">-- km</span>
-                </div>
-
-                <!-- UV Index -->
-                <div class="detail-item">
-                  <div class="detail-icon">☀️</div>
+              </div>
+              <div class="weather-detail" id="detail-uv">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <div>
                   <span class="detail-label">UV Index</span>
-                  <span class="detail-value" id="modal-uv">--</span>
-                </div>
-
-                <!-- Sunrise -->
-                <div class="detail-item">
-                  <div class="detail-icon">🌅</div>
-                  <span class="detail-label">Sunrise</span>
-                  <span class="detail-value" id="modal-sunrise">--</span>
-                </div>
-
-                <!-- Sunset -->
-                <div class="detail-item">
-                  <div class="detail-icon">🌇</div>
-                  <span class="detail-label">Sunset</span>
-                  <span class="detail-value" id="modal-sunset">--</span>
-                </div>
-
-                <!-- Dew Point -->
-                <div class="detail-item">
-                  <div class="detail-icon">❄️</div>
-                  <span class="detail-label">Dew Point</span>
-                  <span class="detail-value" id="modal-dew-point">--</span>
-                </div>
-
-                <!-- Chance of Rain -->
-                <div class="detail-item">
-                  <div class="detail-icon">🌧️</div>
-                  <span class="detail-label">Chance of Rain</span>
-                  <span class="detail-value" id="modal-precip-chance">--%</span>
-                </div>
-
-                <!-- Air Quality Index -->
-                <div class="detail-item">
-                  <div class="detail-icon">💨</div>
-                  <span class="detail-label">Air Quality</span>
-                  <span class="detail-value" id="modal-aqi">--</span>
+                  <span class="detail-value" id="uv-val">--</span>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- 3-Day Forecast Section -->
-      <section class="forecast-section" aria-label="3-day weather forecast">
-        <h2 class="section-title">3-Day Forecast</h2>
-        <div class="forecast-grid" id="forecast-grid" role="list">
-          <!-- Forecast cards injected by JS -->
-        </div>
-      </section>
+          <!-- Premium Weather Details Modal (existing, kept intact) -->
+          <div id="weather-modal" class="weather-modal" role="dialog" aria-labelledby="modal-title" aria-modal="true" hidden>
+            <div class="modal-overlay" id="modal-overlay"></div>
+            <div class="modal-container">
+              <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                  <h2 id="modal-title" class="modal-title">Weather Details</h2>
+                  <button class="modal-close" id="modal-close" aria-label="Close weather details" title="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+                <!-- Modal Body -->
+                <div class="modal-body">
+                  <div class="details-grid">
+                    <div class="detail-item">
+                      <div class="detail-icon">🌡️</div>
+                      <span class="detail-label">Temperature</span>
+                      <span class="detail-value" id="modal-temp">--</span>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-icon">🤔</div>
+                      <span class="detail-label">Feels Like</span>
+                      <span class="detail-value" id="modal-feels-like">--</span>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-icon">💧</div>
+                      <span class="detail-label">Humidity</span>
+                      <span class="detail-value" id="modal-humidity">--%</span>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-icon">🔽</div>
+                      <span class="detail-label">Pressure</span>
+                      <span class="detail-value" id="modal-pressure">-- hPa</span>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-icon">💨</div>
+                      <span class="detail-label">Wind Speed</span>
+                      <span class="detail-value" id="modal-wind">-- km/h</span>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-icon">👁️</div>
+                      <span class="detail-label">Visibility</span>
+                      <span class="detail-value" id="modal-visibility">-- km</span>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-icon">☀️</div>
+                      <span class="detail-label">UV Index</span>
+                      <span class="detail-value" id="modal-uv">--</span>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-icon">🌅</div>
+                      <span class="detail-label">Sunrise</span>
+                      <span class="detail-value" id="modal-sunrise">--</span>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-icon">🌇</div>
+                      <span class="detail-label">Sunset</span>
+                      <span class="detail-value" id="modal-sunset">--</span>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-icon">❄️</div>
+                      <span class="detail-label">Dew Point</span>
+                      <span class="detail-value" id="modal-dew-point">--</span>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-icon">🌧️</div>
+                      <span class="detail-label">Chance of Rain</span>
+                      <span class="detail-value" id="modal-precip-chance">--%</span>
+                    </div>
+                    <div class="detail-item">
+                      <div class="detail-icon">💨</div>
+                      <span class="detail-label">Air Quality</span>
+                      <span class="detail-value" id="modal-aqi">--</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-      <!-- Hourly Trend -->
-      <section class="hourly-section" aria-label="Today's hourly temperature">
-        <h2 class="section-title">Today's Hourly</h2>
-        <div class="hourly-scroll" id="hourly-scroll" role="list" aria-label="Hourly forecast">
-          <!-- Hourly slots injected by JS -->
-        </div>
-      </section>
+          <!-- 7-Day Forecast Section -->
+          <section class="forecast-section forecast-section--7day" aria-label="7-day weather forecast">
+            <h2 class="section-title">7-Day Forecast</h2>
+            <div class="forecast-grid-7" id="forecast-grid-7" role="list" aria-label="7-day forecast">
+              <!-- 7-day cards injected by JS -->
+            </div>
+            <!-- Original 3-day grid kept as fallback (hidden by default now) -->
+            <div class="forecast-grid" id="forecast-grid" role="list" hidden></div>
+          </section>
 
+          <!-- Hourly Trend -->
+          <section class="hourly-section" aria-label="Today's hourly temperature">
+            <h2 class="section-title">Today's Hourly</h2>
+            <div class="hourly-scroll" id="hourly-scroll" role="list" aria-label="Hourly forecast">
+              <!-- Hourly slots injected by JS -->
+            </div>
+          </section>
+
+          <!-- Weather Charts Section -->
+          <section class="charts-section" aria-label="Weather charts" id="charts-section">
+            <h2 class="charts-section-title">Weather Charts <span style="font-size:0.8em;opacity:0.7">— Next 24 Hours</span></h2>
+            <div class="charts-grid">
+              <div class="chart-card" id="chart-temp" aria-label="Temperature chart"></div>
+              <div class="chart-card" id="chart-humidity" aria-label="Humidity chart"></div>
+              <div class="chart-card" id="chart-wind" aria-label="Wind speed chart"></div>
+              <div class="chart-card" id="chart-precip" aria-label="Rain probability chart"></div>
+              <div class="chart-card chart-card--full" id="chart-pressure" aria-label="Pressure chart"></div>
+            </div>
+          </section>
+
+        </div><!-- /weather-content -->
+      </main>
+
+    </div><!-- /main-column -->
+  </div><!-- /app-layout -->
+
+  <!-- ========== METRIC DETAIL DRAWER ========== -->
+  <!-- Backdrop -->
+  <div class="metric-drawer-backdrop" id="metric-drawer-backdrop" aria-hidden="true"></div>
+
+  <!-- Drawer panel -->
+  <aside
+    class="metric-drawer"
+    id="metric-drawer"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="drawer-title"
+  >
+    <div class="drawer-header">
+      <h2 id="drawer-title" class="drawer-header-title">Details</h2>
+      <button class="drawer-close-btn" id="metric-drawer-close" aria-label="Close details panel">✕</button>
     </div>
-  </main>
+    <div class="drawer-body" id="drawer-body">
+      <!-- Content injected by sidebar.js -->
+    </div>
+  </aside>
 
   <!-- ========== FOOTER ========== -->
   <footer class="site-footer" role="contentinfo">

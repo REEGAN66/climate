@@ -1,0 +1,317 @@
+/* ============================================================
+   charts.css — Climate Update
+   Weather chart section layout and card styles
+   ============================================================ */
+
+/* ---------- Charts Section ---------- */
+.charts-section {
+  margin-top: var(--space-8);
+}
+
+.charts-section-title {
+  font-family: var(--font-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.charts-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--glass-border);
+  margin-left: var(--space-2);
+}
+
+/* Charts Tab Nav */
+.charts-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.chart-tab {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  font-family: var(--font-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background var(--transition-base),
+    color var(--transition-base),
+    border-color var(--transition-base),
+    transform var(--transition-fast);
+}
+
+.chart-tab:hover {
+  background: var(--glass-hover);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.chart-tab.active {
+  background: var(--accent);
+  color: var(--text-on-accent);
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+}
+
+/* Charts grid — all visible at once */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Individual chart card */
+.chart-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  box-shadow: var(--card-shadow);
+  transition:
+    background var(--transition-base),
+    border-color var(--transition-base),
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+  overflow: hidden;
+}
+
+.chart-card:hover {
+  background: var(--glass-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Chart title inside the card */
+.chart-title {
+  font-family: var(--font-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+
+/* SVG wrapper — ensures charts are responsive */
+.chart-svg-wrap {
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+.chart-svg-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Pressure chart gets full width */
+.chart-card--full {
+  grid-column: 1 / -1;
+}
+
+/* ---------- 7-Day Forecast Upgrades ---------- */
+.forecast-section--7day .section-title {
+  font-family: var(--font-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.forecast-section--7day .section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--glass-border);
+  margin-left: var(--space-2);
+}
+
+/* 7-day grid — responsive, horizontal scroll on very small screens */
+.forecast-grid-7 {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--space-3);
+}
+
+@media (max-width: 700px) {
+  .forecast-grid-7 {
+    grid-template-columns: repeat(4, minmax(100px, 1fr));
+    overflow-x: auto;
+    padding-bottom: var(--space-2);
+  }
+}
+
+@media (max-width: 460px) {
+  .forecast-grid-7 {
+    grid-template-columns: repeat(3, minmax(90px, 1fr));
+  }
+}
+
+/* 7-day card (more compact than 3-day) */
+.forecast-card-7 {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-2);
+  text-align: center;
+  box-shadow: var(--card-shadow);
+  transition:
+    background var(--transition-base),
+    border-color var(--transition-base),
+    transform var(--transition-base);
+  animation: cardAppear 0.4s ease both;
+  animation-delay: calc(var(--i, 0) * 0.06s);
+}
+
+@keyframes cardAppear {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.forecast-card-7:hover {
+  background: var(--glass-hover);
+  transform: translateY(-3px);
+  border-color: var(--accent);
+}
+
+.forecast-card-7.today-7 {
+  border-color: var(--accent);
+  background: var(--today-card-bg);
+}
+
+.fc7-day {
+  font-family: var(--font-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.fc7-icon {
+  font-size: 1.6rem;
+  display: block;
+  margin-block: var(--space-2);
+}
+
+.fc7-high {
+  font-family: var(--font-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: block;
+}
+
+.fc7-low {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 2px;
+}
+
+.fc7-precip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.7rem;
+  color: var(--precip-color);
+  background: var(--precip-bg);
+  border-radius: var(--radius-full);
+  padding: 2px 6px;
+  margin-top: var(--space-2);
+}
+
+/* ---------- Search Enhancement: Recent & Favourites ---------- */
+
+/* Divider in suggestions dropdown */
+.suggestions-divider {
+  font-family: var(--font-primary);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: var(--space-2) var(--space-4) var(--space-1);
+  pointer-events: none;
+}
+
+/* Favourite button next to location header */
+.btn-favourite {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  transition:
+    transform var(--transition-fast),
+    filter var(--transition-base);
+  vertical-align: middle;
+}
+
+.btn-favourite:hover {
+  transform: scale(1.2);
+  filter: brightness(1.2);
+}
+
+.btn-favourite.is-fav {
+  filter: drop-shadow(0 0 6px rgba(251,191,36,0.6));
+}
+
+/* ---------- Loading Animation for Charts ---------- */
+.chart-skeleton {
+  height: 140px;
+  background: linear-gradient(
+    90deg,
+    var(--glass-bg) 25%,
+    var(--glass-hover) 50%,
+    var(--glass-bg) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--radius-sm);
+  animation: chartShimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes chartShimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* ---------- Accessibility ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .chart-card,
+  .forecast-card-7,
+  .chart-skeleton {
+    animation: none;
+    transition: none;
+  }
+}

@@ -142,20 +142,25 @@ export async function fetchWeather(lat, lon, timezone = 'auto') {
   url.searchParams.set('longitude', lon);
   url.searchParams.set('timezone', timezone);
 
-  // Current weather variables
+  // Current weather variables — includes all sidebar metrics
   url.searchParams.set('current', [
     'temperature_2m',
     'apparent_temperature',
     'relative_humidity_2m',
     'wind_speed_10m',
     'wind_direction_10m',
+    'wind_gusts_10m',
     'precipitation',
     'weather_code',
     'is_day',
     'uv_index',
+    'surface_pressure',
+    'visibility',
+    'dew_point_2m',
+    'cloud_cover',
   ].join(','));
 
-  // Daily variables (7 days for forward compatibility)
+  // Daily variables — 7-day forecast
   url.searchParams.set('daily', [
     'weather_code',
     'temperature_2m_max',
@@ -165,17 +170,26 @@ export async function fetchWeather(lat, lon, timezone = 'auto') {
     'sunrise',
     'sunset',
     'uv_index_max',
+    'wind_direction_10m_dominant',
+    'wind_gusts_10m_max',
   ].join(','));
 
-  // Hourly variables (24h)
+  // Hourly variables — extended for charts and sidebar
   url.searchParams.set('hourly', [
     'temperature_2m',
+    'relative_humidity_2m',
+    'wind_speed_10m',
+    'wind_direction_10m',
+    'surface_pressure',
+    'visibility',
+    'dew_point_2m',
+    'cloud_cover',
     'weather_code',
     'precipitation_probability',
     'is_day',
   ].join(','));
 
-  url.searchParams.set('forecast_days', '4');
+  url.searchParams.set('forecast_days', '7');
   url.searchParams.set('models', 'best_match');
 
   const res = await fetch(url.toString(), { signal: AbortSignal.timeout(10000) });
@@ -200,18 +214,23 @@ export async function fetchWeather(lat, lon, timezone = 'auto') {
 function parseWeatherResponse(raw) {
   const { current, daily, hourly } = raw;
 
-  // ─ Current ─
+  // ─ Current — includes all sidebar + modal fields ─
   const currentParsed = {
-    temp:        round(current.temperature_2m),
-    feelsLike:   round(current.apparent_temperature),
-    humidity:    current.relative_humidity_2m,
-    windSpeed:   round(current.wind_speed_10m),
-    windDir:     current.wind_direction_10m,
+    temp:         round(current.temperature_2m),
+    feelsLike:    round(current.apparent_temperature),
+    humidity:     current.relative_humidity_2m,
+    windSpeed:    round(current.wind_speed_10m),
+    windDir:      current.wind_direction_10m,
+    windGusts:    round(current.wind_gusts_10m ?? 0),
     precipitation: current.precipitation,
-    wmoCode:     current.weather_code,
-    isDay:       Boolean(current.is_day),
-    uvIndex:     current.uv_index ?? 0,
-    fetchedAt:   new Date(),
+    wmoCode:      current.weather_code,
+    isDay:        Boolean(current.is_day),
+    uvIndex:      current.uv_index ?? 0,
+    pressure:     round(current.surface_pressure ?? 1013),
+    visibility:   round((current.visibility ?? 10000) / 1000, 1), // m → km
+    dewPoint:     round(current.dew_point_2m ?? 0),
+    cloudCover:   current.cloud_cover ?? 0,
+    fetchedAt:    new Date(),
     ...getWmoInfo(current.weather_code),
   };
 
@@ -222,8 +241,8 @@ function parseWeatherResponse(raw) {
     currentParsed.label = 'Clear Night';
   }
 
-  // ─ Daily (3 days) ─
-  const numDays = Math.min(3, daily.time.length);
+  // ─ Daily (up to 7 days) ─
+  const numDays = Math.min(7, daily.time.length);
   const dailyParsed = Array.from({ length: numDays }, (_, i) => {
     const wmo = getWmoInfo(daily.weather_code[i]);
     return {
@@ -233,25 +252,34 @@ function parseWeatherResponse(raw) {
       tempMin:         round(daily.temperature_2m_min[i]),
       precipChance:    daily.precipitation_probability_max[i] ?? 0,
       precipSum:       round(daily.precipitation_sum[i] ?? 0, 1),
-      sunrise:         daily.sunrise?.[i] ? new Date(daily.sunrise[i]) : null,
-      sunset:          daily.sunset?.[i]  ? new Date(daily.sunset[i])  : null,
+      sunrise:         daily.sunrise?.[i]  ? new Date(daily.sunrise[i])  : null,
+      sunset:          daily.sunset?.[i]   ? new Date(daily.sunset[i])   : null,
       uvMax:           daily.uv_index_max?.[i] ?? 0,
+      windDir:         daily.wind_direction_10m_dominant?.[i] ?? 0,
+      windGusts:       round(daily.wind_gusts_10m_max?.[i] ?? 0),
       ...wmo,
     };
   });
 
-  // ─ Hourly (next 24 slots from now) ─
+  // ─ Hourly (next 24 slots from now) — extended fields for charts ─
   const nowIdx = findCurrentHourIndex(hourly.time);
   const hourlyParsed = hourly.time
     .slice(nowIdx, nowIdx + 24)
     .map((t, idx) => {
       const i = nowIdx + idx;
       return {
-        time:     new Date(t),
-        temp:     round(hourly.temperature_2m[i]),
-        wmoCode:  hourly.weather_code[i],
-        precipP:  hourly.precipitation_probability[i] ?? 0,
-        isDay:    Boolean(hourly.is_day?.[i]),
+        time:       new Date(t),
+        temp:       round(hourly.temperature_2m[i]),
+        humidity:   hourly.relative_humidity_2m?.[i] ?? null,
+        windSpeed:  round(hourly.wind_speed_10m?.[i] ?? 0),
+        windDir:    hourly.wind_direction_10m?.[i] ?? 0,
+        pressure:   round(hourly.surface_pressure?.[i] ?? 1013),
+        visibility: round((hourly.visibility?.[i] ?? 10000) / 1000, 1),
+        dewPoint:   round(hourly.dew_point_2m?.[i] ?? 0),
+        cloudCover: hourly.cloud_cover?.[i] ?? 0,
+        wmoCode:    hourly.weather_code[i],
+        precipP:    hourly.precipitation_probability[i] ?? 0,
+        isDay:      Boolean(hourly.is_day?.[i]),
         ...getWmoInfo(hourly.weather_code[i]),
       };
     });
