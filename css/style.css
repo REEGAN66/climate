@@ -380,10 +380,11 @@ ul { list-style: none; }
 .header-inner,
 .search-wrapper,
 .main-content {
-  max-width: 900px;
+  max-width: 1280px;
   margin-inline: auto;
   padding-inline: var(--space-4);
 }
+
 
 /* ---------- 5. Header ---------- */
 .site-header {
@@ -402,6 +403,13 @@ ul { list-style: none; }
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
+  max-width: 1280px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
 .logo {
@@ -1501,3 +1509,138 @@ ul { list-style: none; }
 .site-footer a:hover {
   color: var(--accent);
 }
+
+/* ============================================================
+   Additions — sidebar integration, utility classes, new animations
+   ============================================================ */
+
+/* Sidebar toggle label hide on very small screens */
+@media (max-width: 480px) {
+  .sidebar-toggle-label { display: none; }
+}
+
+/* Location name wrap — accommodates favourite ⭐ button inline */
+.location-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* Screen-reader only text utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Lightning flash overlay for stormy theme */
+.weather-bg-layer.lightning-flash {
+  background: rgba(220,220,255,0.18) !important;
+  transition: background 0.04s ease;
+}
+
+/* Cloudy drifting blob animation (CSS-only) */
+.bg-cloudy-anim::before,
+.bg-cloudy-anim::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  filter: blur(60px);
+  animation: cloudDrift 18s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.bg-cloudy-anim::before {
+  width: 500px;
+  height: 300px;
+  top: 10%;
+  left: -100px;
+  animation-delay: 0s;
+}
+
+.bg-cloudy-anim::after {
+  width: 400px;
+  height: 250px;
+  top: 30%;
+  right: -80px;
+  animation-delay: -9s;
+}
+
+@keyframes cloudDrift {
+  0%   { transform: translateX(0); }
+  50%  { transform: translateX(80px); }
+  100% { transform: translateX(0); }
+}
+
+/* Hero card: make it open modal cursor */
+#hero-card {
+  cursor: pointer;
+}
+
+/* Forecast section update — use 7-day by default */
+.forecast-section .section-title {
+  font-family: var(--font-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.forecast-section .section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--glass-border);
+  margin-left: var(--space-2);
+}
+
+/* Main content keeps 900px max-width for readability */
+.weather-content,
+.search-wrapper {
+  max-width: 900px;
+  margin-inline: auto;
+}
+
+/* btn-locate style (already in CSS, just adding missing rule) */
+.btn-locate {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--font-primary);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--transition-base),
+    border-color var(--transition-base),
+    transform var(--transition-fast);
+}
+
+.btn-locate:hover {
+  background: var(--glass-hover);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 520px) {
+  .btn-locate span { display: none; }
+  .header-controls { gap: var(--space-2); }
+}
+

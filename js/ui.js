@@ -6,6 +6,7 @@
 
 import { formatTemp, toMph } from './api.js';
 import { startWeatherBg }   from './weather-bg.js';
+import { renderAllCharts, destroyCharts } from './charts.js';
 
 // ────────────────────────────────────────────────────────────
 // DOM Element References (cached for performance)
@@ -40,7 +41,9 @@ export const els = {
 
   // Sections
   forecastGrid:      $('forecast-grid'),
+  forecastGrid7:     $('forecast-grid-7'),
   hourlyScroll:      $('hourly-scroll'),
+  chartsSection:     $('charts-section'),
 
   // Unit buttons
   btnCelsius:        $('btn-celsius'),
@@ -224,8 +227,47 @@ export function renderForecast(daily, unit) {
 }
 
 // ────────────────────────────────────────────────────────────
-// Hourly Forecast Rendering
+// 7-Day Forecast Rendering
 // ────────────────────────────────────────────────────────────
+
+const SHORT_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+/**
+ * Render up to 7 forecast cards into the 7-day grid.
+ * @param {Array}   daily  Parsed daily array (up to 7 items)
+ * @param {'C'|'F'} unit
+ */
+export function renderForecast7(daily, unit) {
+  const grid = els.forecastGrid7;
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  daily.forEach((day, i) => {
+    const card = document.createElement('article');
+    card.className = `forecast-card-7${i === 0 ? ' today-7' : ''}`;
+    card.setAttribute('role', 'listitem');
+    card.setAttribute('aria-label', `${SHORT_DAYS[day.date.getDay()]} forecast`);
+    card.style.setProperty('--i', i);
+
+    const high   = formatTemp(day.tempMax, unit);
+    const low    = formatTemp(day.tempMin, unit);
+    const unitSt = unit === 'F' ? '°F' : '°C';
+    const dayLbl = i === 0 ? 'Today' : i === 1 ? 'Tmrw' : SHORT_DAYS[day.date.getDay()];
+
+    card.innerHTML = `
+      <p class="fc7-day">${dayLbl}</p>
+      <span class="fc7-icon" aria-hidden="true">${day.emoji}</span>
+      <strong class="fc7-high">${high}${unitSt}</strong>
+      <span class="fc7-low">${low}${unitSt}</span>
+      ${day.precipChance > 0
+        ? `<span class="fc7-precip">💧 ${day.precipChance}%</span>`
+        : ''}
+    `;
+
+    grid.appendChild(card);
+  });
+}
+
 
 /**
  * Render hourly slots (next 24 hours).
@@ -260,6 +302,24 @@ export function renderHourly(hourly, unit) {
     `;
 
     els.hourlyScroll.appendChild(div);
+  });
+}
+
+// ────────────────────────────────────────────────────────────
+// Weather Charts
+// ────────────────────────────────────────────────────────────
+
+/**
+ * Render all 5 SVG weather charts for the next 24 hours.
+ * @param {Array}   hourly  Parsed hourly array
+ * @param {'C'|'F'} unit
+ */
+export function renderCharts(hourly, unit) {
+  if (!hourly?.length) return;
+  // Defer to next frame so chart containers have stable clientWidth
+  requestAnimationFrame(() => {
+    destroyCharts();
+    renderAllCharts(hourly, unit);
   });
 }
 

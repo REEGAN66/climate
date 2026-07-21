@@ -12,9 +12,10 @@
 // ────────────────────────────────────────────────────────────
 // State
 // ────────────────────────────────────────────────────────────
-let animFrameId = null;
-let activeTheme = null;
-let resizeTimer = null;
+let animFrameId  = null;
+let activeTheme  = null;
+let resizeTimer  = null;
+let resizeAC     = null;   // AbortController for resize listener (prevents leaks)
 
 // ────────────────────────────────────────────────────────────
 // Utility helpers
@@ -46,6 +47,12 @@ function stopCanvas() {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
+  // Abort any outstanding resize listeners to prevent leaks
+  if (resizeAC) {
+    resizeAC.abort();
+    resizeAC = null;
+  }
+  clearTimeout(resizeTimer);
 }
 
 function clearLayer() {
@@ -75,13 +82,14 @@ export function startWeatherBg(theme) {
   if (prefersReducedMotion()) return;   // respect user preference
 
   switch (theme) {
-    case 'rainy':  startRain(false); break;
-    case 'stormy': startRain(true);  break;
-    case 'snowy':  startSnow();      break;
-    case 'sunny':  startSun();       break;
-    case 'night':  startNight();     break;
-    case 'foggy':  startFog();       break;
-    default:       break;            // cloudy / default → gradient only
+    case 'rainy':   startRain(false);  break;
+    case 'stormy':  startRain(true);   startLightning(); break;
+    case 'snowy':   startSnow();       break;
+    case 'sunny':   startSun();        break;
+    case 'night':   startNight();      break;
+    case 'foggy':   startFog();        break;
+    case 'cloudy':  startCloudy();     break;
+    default:        break;             // default → gradient only
   }
 }
 
@@ -150,12 +158,12 @@ function startRain(heavy) {
 
   animFrameId = requestAnimationFrame(frame);
 
-  // Handle resize
-  const onResize = () => {
+  // Handle resize — use AbortController to prevent listener accumulation
+  resizeAC = new AbortController();
+  window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => sizeCanvas(canvas), 200);
-  };
-  window.addEventListener('resize', onResize, { passive: true });
+  }, { passive: true, signal: resizeAC.signal });
 }
 
 // ────────────────────────────────────────────────────────────
@@ -220,10 +228,11 @@ function startSnow() {
 
   animFrameId = requestAnimationFrame(frame);
 
+  resizeAC = new AbortController();
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => sizeCanvas(canvas), 200);
-  }, { passive: true });
+  }, { passive: true, signal: resizeAC.signal });
 }
 
 // ────────────────────────────────────────────────────────────
@@ -273,4 +282,36 @@ function startFog() {
   const layer = getLayer();
   if (layer) layer.classList.add('bg-foggy-anim');
   // Fog drift is handled purely in CSS
+}
+
+// ────────────────────────────────────────────────────────────
+// Cloudy (CSS cloud blobs)
+// ────────────────────────────────────────────────────────────
+function startCloudy() {
+  const layer = getLayer();
+  if (layer) layer.classList.add('bg-cloudy-anim');
+}
+
+// ────────────────────────────────────────────────────────────
+// Lightning flash (stormy overlay)
+// ────────────────────────────────────────────────────────────
+function startLightning() {
+  const layer = getLayer();
+  if (!layer || prefersReducedMotion()) return;
+
+  function flash() {
+    // Only flash if still in stormy theme
+    if (activeTheme !== 'stormy') return;
+
+    layer.classList.add('lightning-flash');
+    setTimeout(() => {
+      layer.classList.remove('lightning-flash');
+      // Schedule next flash in 4–18 seconds
+      const delay = 4000 + Math.random() * 14000;
+      setTimeout(flash, delay);
+    }, 120);
+  }
+
+  // Start first flash after 2–6 seconds
+  setTimeout(flash, 2000 + Math.random() * 4000);
 }
